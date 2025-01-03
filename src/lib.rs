@@ -1,14 +1,30 @@
-use proc_macro::TokenStream;
-use quote::quote;
-use syn::{parse_macro_input, ItemFn};
+use proc_macro2::TokenStream;
+use quote::{quote, format_ident};
+use syn::{parse_macro_input, Item, ItemFn};
 use std::path::PathBuf;
 
 const DEFAULT_HOOKS_PATH: &str = ".hooks";
 const PRE_HOOK_NAME: &str = "pre.rs";
 const POST_HOOK_NAME: &str = "post.rs";
 
+fn extract_function_names(content: &TokenStream) -> Vec<String> {
+    let file = syn::parse2::<syn::File>(content.clone().into())
+        .expect("Failed to parse file content");
+    
+    file.items.iter()
+        .filter_map(|item| {
+            if let Item::Fn(func) = item {
+                Some(func.sig.ident.to_string())
+            } else {
+                None
+            }
+        })
+        .collect()
+}
+
+
 #[proc_macro_attribute]
-pub fn with_hooks(_: TokenStream, item: TokenStream) -> TokenStream {
+pub fn with_hooks(_: proc_macro::TokenStream, item: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(item as ItemFn);
     let sig = &input.sig;
     let block = &input.block;
@@ -26,9 +42,14 @@ pub fn with_hooks(_: TokenStream, item: TokenStream) -> TokenStream {
         } else {
             panic!("Hook file not found: {}", hook_path_str);
         };
+
+        let function_names = extract_function_names(&hook_content);
+        let function_calls = function_names.iter()
+            .map(|name| format_ident!("{}", name));
         
         quote! {
             #hook_content
+            #(#function_calls();)*
         }
     };
 
@@ -44,9 +65,14 @@ pub fn with_hooks(_: TokenStream, item: TokenStream) -> TokenStream {
         } else {
             panic!("Hook file not found: {}", hook_path_str);
         };
+
+        let function_names = extract_function_names(&hook_content);
+        let function_calls = function_names.iter()
+            .map(|name| format_ident!("{}", name));
         
         quote! {
             #hook_content
+            #(#function_calls();)*
         }
     };
 
