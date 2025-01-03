@@ -28,7 +28,7 @@ pub fn with_hooks(_: TokenStream, item: TokenStream) -> TokenStream {
                 .expect(&format!("Failed to parse pre-hook file: {}", hook_path_str));
             proc_macro2::TokenStream::from(tokens)
         } else {
-            quote! { println!("Before executing {}", stringify!(#fn_name)); }
+            panic!("Hook file not found: {}", hook_path_str);
         };
         
         quote! {
@@ -46,7 +46,7 @@ pub fn with_hooks(_: TokenStream, item: TokenStream) -> TokenStream {
                 .expect(&format!("Failed to parse post-hook file: {}", hook_path_str));
             proc_macro2::TokenStream::from(tokens)
         } else {
-            quote! { println!("After executing {}", stringify!(#fn_name)); }
+            panic!("Hook file not found: {}", hook_path_str);
         };
         
         quote! {
