@@ -33,6 +33,8 @@ cli_hooks_rs = "0.1.0"
 
 ## Usage
 
+See the complete working example in the [`example/`](example/) directory
+
 Usage with custom hooks:
 
 ```rust
