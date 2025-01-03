@@ -8,7 +8,7 @@ license-file = "LICENSE"
 homepage = "https://github.com/MCarlomagno/cli-hooks-rs"
 repository = "https://github.com/MCarlomagno/cli-hooks-rs"
 readme = "README.md"
-keywords = ["cli", "command", "terminal", "api", "hook", "pre", "post", "dev", "tool"]
+keywords = ["cli", "command", "terminal", "hook", "tool"]
 categories = ["command-line-utilities", "command-line-interface", "development-tools"]
 
 [dependencies]
