@@ -1,7 +1,9 @@
 [package]
 name = "cli_hooks"
+description = "A procedural macro that enables dynamic execution of Rust code before and after function calls."
 version = "0.1.0"
 edition = "2021"
+licence = "LGPL-2.1-only"
 licence-file = "LICENCE"
 homepage = "https://github.com/MCarlomagno/cli-hooks-rs"
 repository = "https://github.com/MCarlomagno/cli-hooks-rs"
