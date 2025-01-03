@@ -28,7 +28,7 @@ pub fn with_hooks(_: proc_macro::TokenStream, item: proc_macro::TokenStream) -> 
     let input = parse_macro_input!(item as ItemFn);
     let sig = &input.sig;
     let block = &input.block;
-    let fn_name = &sig.ident;
+    let _ = &sig.ident; // function name
 
     let pre_hook = {
         let hook_path = PathBuf::from(DEFAULT_HOOKS_PATH).join(PRE_HOOK_NAME);

@@ -1,4 +1,4 @@
-use cli_hooks_rs::with_hooks;
+use cli_hooks::with_hooks;
 
 #[test]
 fn test_with_hooks_with_rust_hooks() {

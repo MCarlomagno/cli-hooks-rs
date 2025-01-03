@@ -1,7 +1,13 @@
 [package]
-name = "cli_hooks_rs"
+name = "cli_hooks"
 version = "0.1.0"
 edition = "2021"
+licence = "LICENCE"
+homepage = "https://github.com/MCarlomagno/cli-hooks-rs"
+repository = "https://github.com/MCarlomagno/cli-hooks-rs"
+readme = "README.md"
+keywords = ["cli", "command", "terminal", "api", "hook", "pre", "post", "dev", "tool"]
+categories = ["command-line-utilities", "command-line-interface", "development-tools"]
 
 [dependencies]
 syn = { version = "2.0", features = ["full"] }
