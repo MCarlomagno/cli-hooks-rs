@@ -36,23 +36,20 @@ cli_hooks_rs = "0.1.0"
 Usage with custom hooks:
 
 ```rust
-// pre_hook.rs
-pub fn hook() {
-  let start_time = std::time::Instant::now();
-  println!("Starting execution at {:?}", start_time);
-  ()
+// .hooks/pre.rs (end user injected code)
+{
+  println!("Starting execution");
 }
 
-// post_hook.rs
-pub fn hook() {
+// .hooks/post.rs (end user injected code)
+{
   println!("Execution completed");
-  ()
 }
 
-// main.rs
+// main.rs  (CLI app)
 use cli_hooks_rs::with_hooks;
-#[with_hooks("hooks/pre_hook.rs", "hooks/post_hook.rs")]
-  fn expensive_operation() -> i32 {
+#[with_hooks]
+fn some_function() -> i32 {
   std::thread::sleep(std::time::Duration::from_secs(1));
   42
 }
