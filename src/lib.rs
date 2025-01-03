@@ -1,68 +1,58 @@
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{parse_macro_input, ItemFn, parse::Parse, parse::ParseStream, LitStr};
+use syn::{parse_macro_input, ItemFn};
+use std::path::PathBuf;
 
-struct HookPaths {
-    pre_hook: Option<String>,
-    post_hook: Option<String>,
-}
-
-impl Parse for HookPaths {
-    fn parse(input: ParseStream) -> syn::Result<Self> {
-        let mut pre_hook = None;
-        let mut post_hook = None;
-
-        if !input.is_empty() {
-            pre_hook = Some(input.parse::<LitStr>()?.value());
-            if input.peek(syn::Token![,]) {
-                let _ = input.parse::<syn::Token![,]>();
-                post_hook = Some(input.parse::<LitStr>()?.value());
-            }
-        }
-
-        Ok(HookPaths { pre_hook, post_hook })
-    }
-}
+const HOOKS_PATH_ENV: &str = "CLI_HOOKS_PATH";
+const DEFAULT_HOOKS_PATH: &str = ".hooks";
+const PRE_HOOK_NAME: &str = "pre.rs";
+const POST_HOOK_NAME: &str = "post.rs";
 
 #[proc_macro_attribute]
-pub fn with_hooks(attr: TokenStream, item: TokenStream) -> TokenStream {
-    let paths = parse_macro_input!(attr as HookPaths);
+pub fn with_hooks(_: TokenStream, item: TokenStream) -> TokenStream {
     let input = parse_macro_input!(item as ItemFn);
-
     let sig = &input.sig;
     let block = &input.block;
     let fn_name = &sig.ident;
 
-    let pre_hook = if let Some(path) = paths.pre_hook {
-        let content = std::fs::read_to_string(&path)
-            .expect(&format!("Failed to read pre-hook file: {}", path));
-        let content_tokens = content.parse::<TokenStream>()
-            .expect(&format!("Failed to parse pre-hook file: {}", path));
-        let content_tokens = proc_macro2::TokenStream::from(content_tokens);
+    let hooks_dir = std::env::var(HOOKS_PATH_ENV)
+        .unwrap_or_else(|_| DEFAULT_HOOKS_PATH.to_string());
+
+    let pre_hook = {
+        let hook_path = PathBuf::from(&hooks_dir).join(PRE_HOOK_NAME);
+        let hook_path_str = hook_path.to_str().unwrap();
+
+        // Read and parse the content outside quote!
+        let hook_content = if let Ok(content) = std::fs::read_to_string(hook_path_str) {
+            let tokens = content.parse::<TokenStream>()
+                .expect(&format!("Failed to parse pre-hook file: {}", hook_path_str));
+            proc_macro2::TokenStream::from(tokens)
+        } else {
+            quote! { println!("Before executing {}", stringify!(#fn_name)); }
+        };
         
         quote! {
-            println!("Executing pre-hook from {}", #path);
-            #content_tokens
+            #hook_content
         }
-    } else {
-        quote! { println!("Before executing {}", stringify!(#fn_name)); }
     };
 
-    let post_hook = if let Some(path) = paths.post_hook {
-        let content = std::fs::read_to_string(&path)
-            .expect(&format!("Failed to read post-hook file: {}", path));
-        let content_tokens = content.parse::<TokenStream>()
-            .expect(&format!("Failed to parse post-hook file: {}", path));
-        let content_tokens = proc_macro2::TokenStream::from(content_tokens);
+    let post_hook = {
+        let hook_path = PathBuf::from(&hooks_dir).join(POST_HOOK_NAME);
+        let hook_path_str = hook_path.to_str().unwrap();
+
+        // Read and parse the content outside quote!
+        let hook_content = if let Ok(content) = std::fs::read_to_string(hook_path_str) {
+            let tokens = content.parse::<TokenStream>()
+                .expect(&format!("Failed to parse post-hook file: {}", hook_path_str));
+            proc_macro2::TokenStream::from(tokens)
+        } else {
+            quote! { println!("After executing {}", stringify!(#fn_name)); }
+        };
         
         quote! {
-            println!("Executing post-hook from {}", #path);
-            #content_tokens
+            #hook_content
         }
-    } else {
-        quote! { println!("After executing {}", stringify!(#fn_name)); }
     };
-
 
     let output = quote! {
         #sig {
