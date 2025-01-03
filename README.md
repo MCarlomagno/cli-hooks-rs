@@ -1,6 +1,6 @@
 ## CLI hooks for Rust
 
-> ⚠️ **Warning**: This project is experimental and under active development. The API and functionality may undergo significant changes. Use with caution in production environments.
+> ⚠️ **Warning**: This project is experimental and under active development. The API and functionality may undergo significant changes. Not ready for production environments.
 
 A procedural macro that enables dynamic execution of Rust code before and after function calls. Unlike typical procedural macros that are limited to compile-time code generation, this crate allows you to:
 
@@ -37,12 +37,12 @@ Usage with custom hooks:
 
 ```rust
 // .hooks/pre.rs (end user injected code)
-{
+fn check_pre() {
   println!("Starting execution");
 }
 
 // .hooks/post.rs (end user injected code)
-{
+fn check_post() {
   println!("Execution completed");
 }
 
