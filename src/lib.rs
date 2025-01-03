@@ -3,7 +3,6 @@ use quote::quote;
 use syn::{parse_macro_input, ItemFn};
 use std::path::PathBuf;
 
-const HOOKS_PATH_ENV: &str = "CLI_HOOKS_PATH";
 const DEFAULT_HOOKS_PATH: &str = ".hooks";
 const PRE_HOOK_NAME: &str = "pre.rs";
 const POST_HOOK_NAME: &str = "post.rs";
@@ -15,11 +14,8 @@ pub fn with_hooks(_: TokenStream, item: TokenStream) -> TokenStream {
     let block = &input.block;
     let fn_name = &sig.ident;
 
-    let hooks_dir = std::env::var(HOOKS_PATH_ENV)
-        .unwrap_or_else(|_| DEFAULT_HOOKS_PATH.to_string());
-
     let pre_hook = {
-        let hook_path = PathBuf::from(&hooks_dir).join(PRE_HOOK_NAME);
+        let hook_path = PathBuf::from(DEFAULT_HOOKS_PATH).join(PRE_HOOK_NAME);
         let hook_path_str = hook_path.to_str().unwrap();
 
         // Read and parse the content outside quote!
@@ -37,7 +33,7 @@ pub fn with_hooks(_: TokenStream, item: TokenStream) -> TokenStream {
     };
 
     let post_hook = {
-        let hook_path = PathBuf::from(&hooks_dir).join(POST_HOOK_NAME);
+        let hook_path = PathBuf::from(DEFAULT_HOOKS_PATH).join(POST_HOOK_NAME);
         let hook_path_str = hook_path.to_str().unwrap();
 
         // Read and parse the content outside quote!
